@@ -1,78 +1,81 @@
+#include <stdbool.h>
 #include "sort.h"
-/**
-*swap - the positions of two elements into an array
-*@array: array
-*@item1: array element
-*@item2: array element
-*/
-void swap(int *array, ssize_t item1, ssize_t item2)
-{
-	int tmp;
 
-	tmp = array[item1];
-	array[item1] = array[item2];
-	array[item2] = tmp;
-}
+
 /**
- *lomuto_partition - lomuto partition sorting scheme implementation
- *@array: array
- *@first: first array element
- *@last: last array element
- *@size: size array
- *Return: return the position of the last element sorted
+ * swapnprint - swaps two integers in an array and prints the array
+ * @a: first number
+ * @b: second number
+ * @array: the arry to be printed
+ * @size: size of the array
  */
-int lomuto_partition(int *array, ssize_t first, ssize_t last, size_t size)
+void swapnprint(int *a, int *b, int *array, size_t size)
 {
-	int pivot = array[last];
-	ssize_t current = first, finder;
+	int tmp = *a;
 
-	for (finder = first; finder < last; finder++)
+	*a = *b;
+	*b = tmp;
+	print_array(array, size);
+}
+
+/**
+ * quick_sort_rec - a recursive implementation of the quick sort algorithm
+ * @array: the array to be sorted
+ * @size: the length of the array
+ * @beg: the begning of the usnorted subset of the array from the left
+ *    [1,2,4,3,7,6,8] in this case index 2
+ * @end: the begning of the unsorted subset of the array from the right
+ */
+void quick_sort_rec(int *array, size_t size, size_t beg, size_t end)
+{
+	int pivot;
+	size_t l = beg, r = end - 1;
+	bool lfound = false, rfound = false;
+
+	if (end <= beg || size <= 1)
+		return;
+	if (end == beg + 1)
 	{
-		if (array[finder] < pivot)
+		if (array[beg] > array[end])
+			swapnprint(array + beg, array + end, array, size);
+		return;
+	}
+	pivot = array[end];
+	while (l < end)
+	{
+		if (l >= r)
 		{
-			if (array[current] != array[finder])
-			{
-				swap(array, current, finder);
-				print_array(array, size);
-			}
-			current++;
+			if (lfound)
+				swapnprint(array + end, array + r, array, size), beg += 1;
+			else if (rfound)
+				end -= 1;
+			else
+				swapnprint(array + end, array + l, array, size);
+			quick_sort_rec(array, size, beg, end);
+			break;
+		}
+		if (array[l] >= pivot)
+			lfound = true;
+		if (array[r] < pivot)
+			rfound = true;
+		if (!lfound)
+			l++;
+		if (!rfound)
+			r--;
+		if (lfound && rfound)
+		{
+			swapnprint(array + l, array + r, array, size);
+			lfound = false, rfound = false;
 		}
 	}
-	if (array[current] != array[last])
-	{
-		swap(array, current, last);
-		print_array(array, size);
-	}
-	return (current);
 }
+
 /**
- *qs - qucksort algorithm implementation
- *@array: array
- *@first: first array element
- *@last: last array element
- *@size: array size
- */
-void qs(int *array, ssize_t first, ssize_t last, int size)
-{
-	ssize_t position = 0;
-
-
-	if (first < last)
-	{
-		position = lomuto_partition(array, first, last, size);
-
-		qs(array, first, position - 1, size);
-		qs(array, position + 1, last, size);
-	}
-}
-/**
- *quick_sort - prepare the terrain to quicksort algorithm
- *@array: array
- *@size: array size
+ * quick_sort - an implementation of the quick sort algorithm
+ * @array: the array to be sorted
+ * @size: the length of the array
  */
 void quick_sort(int *array, size_t size)
 {
-	if (!array || size < 2)
-		return;
-	qs(array, 0, size - 1, size);
+	quick_sort_rec(array, size, 0, size - 1);
 }
